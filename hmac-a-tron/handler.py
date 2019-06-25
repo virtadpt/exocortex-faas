@@ -81,10 +81,10 @@ def generate_jwt(arguments):
 
     # Generate a JWT.
     jwt_token = jwt.encode(arguments["payload"], arguments["secret"],
-        algorithm=arguments["headers"]["alg"], headers=arguments["headers"])
+        arguments["headers"]["alg"])
 
     # Return the JWT to the client.
-    return jwt_token
+    return jwt_token.decode("utf-8")
 
 # Ensure that all of the keys required to carry out an HMAC are in the
 # hash table.
@@ -189,9 +189,9 @@ if __name__ == "__main__":
 
     # Hardcode some test vectors generated separately.
     jwt_test_vectors = {}
-    jwt_test_vectors["HS256"] = b"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJiYXoiOiJxdXV4In0.agcClha4Hgw6AV1Pq523jRiBz-p96E058OcUWi-iNhk"
-    jwt_test_vectors["HS384"] = b"eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJiYXoiOiJxdXV4In0.DJApT_yvM43YieT36UoNawOu-JkTwMdhAYtmlDbfMQHh1E5GVG9c6sHtBj5LJT4f"
-    jwt_test_vectors["HS512"] = b"eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJiYXoiOiJxdXV4In0.lITEaEPbLUI0ArqSiwrh74EfxfH4khk7os3tdSpEiTMpL4YzcioOIhZe4lWP9U2NNkWmS8MamwquSJ13YNIZ2w"
+    jwt_test_vectors["HS256"] = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmb28iOiJiYXIiLCJiYXoiOiJxdXV4In0.NvrvToUN9NqZXOtXoowxzr_MJPwBucT-R8t9mlBdulw"
+    jwt_test_vectors["HS384"] = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzM4NCJ9.eyJmb28iOiJiYXIiLCJiYXoiOiJxdXV4In0.NYTwQz44NdyPZrIk9khXkyD-cmCy03jdausztGVimwX34e_aVTvvqVIJd1F3yr3G"
+    jwt_test_vectors["HS512"] = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJmb28iOiJiYXIiLCJiYXoiOiJxdXV4In0.3PFRw_Hl4JDJULFU_j_aWgm4YvH9R5KGtGq0T4_pTiONbRsUd4QkrktfIMsPivbz9P0lCxfjp0G5USNcC4cocA"
 
     # Set up the arguments hash.
     arguments = {}
@@ -212,7 +212,6 @@ if __name__ == "__main__":
         arguments["headers"]["alg"] = i
         print("Value of arguments: " + str(arguments))
         output = handle(json.dumps(arguments))
-        print("Test vector: " + str(jwt_test_vectors[i]))
         print("Value of output: " + str(output))
         if output == jwt_test_vectors[i]:
             print("JWT " + i + " checks out.")
