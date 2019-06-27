@@ -48,6 +48,38 @@ supported_hmac_hashes = [ "md5", "sha1", "sha224", "sha256", "sha384", "sha512" 
 required_jwt_keys = [ "hash", "headers", "payload", "secret" ]
 supported_jwt_algorithms = [ "HS256", "HS384", "HS512" ]
 
+help = """
+I'm a microservice which calculates HMACs (https://en.wikipedia.org/wiki/HMAC)
+and JWTs (https://jwt.io/) for the purpose of interacting with APIs that
+require them for authentication.
+
+To get an HMAC of a payload, send me a JSON document that looks like this:
+    {
+        "data": "<data here>",
+        "hash": "<hashing algorithm to use>",
+        "secret": "<authentication secret>"
+    }
+Supported HMAC hashes:
+    md5, sha1, sha224, sha256, sha384, sha512
+
+To get a JWT block, send me a JSON document that looks like this:
+    {
+        "hash": "jwt",
+        "headers": {
+            "alg": "<JWT algorithm to use>",
+            "typ": "JWT"
+        },
+        "payload": {
+            "key": "value",
+            "another key": "another value",
+            and so forth...
+        },
+        "secret": "<authentication secret>"
+    }
+Supported JWT algorithms:
+    HS256, HS386, HS512
+"""
+
 # Try to deserialize content from the client.  Return the hash table
 # containing the deserialized JSON if it exists.
 def deserialize_content(content):
@@ -135,7 +167,7 @@ def handle(request):
 
     # Handle the case where the request is empty.
     if not request:
-        return "Where was the request?"
+        return help
 
     # Ensure that the client sent JSON and not something else.
     arguments = deserialize_content(request)
