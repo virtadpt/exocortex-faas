@@ -15,7 +15,8 @@ responses = [
     "I grabbed these weeds from a local area.",
     "Imagine these in the hands of someone who knows what they're doing!",
     "That looks safe.",
-    "All those years of _Duck Hunt_ finally paid off!"
+    "All those years of _Duck Hunt_ finally paid off!",
+    "yarrrr, there be explosions in here...."
     ]
 
 def handle(req):
