@@ -1,0 +1,9 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://127.0.0.1:8080
+functions:
+  where-on-earth:
+    lang: dockerfile
+    handler: ./where-on-earth
+    image: where-on-earth:latest
