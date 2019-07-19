@@ -1,0 +1,9 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://127.0.0.1:8080
+functions:
+  coordinate-converter:
+    lang: python3
+    handler: ./coordinate-converter
+    image: coordinate-converter:latest

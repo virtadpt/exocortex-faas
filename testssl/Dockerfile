@@ -28,7 +28,7 @@ RUN cp testssl.sh /usr/local/bin
 USER app
 
 # Populate example here - i.e. "cat", "sha512sum" or "node index.js"
-ENV fprocess="xargs testssl.sh --quiet --color 0"
+ENV fprocess="xargs -r -t -I foobarbaz testssl.sh --quiet --color=0 --jsonfile=/dev/stdout --logfile=/dev/null foobarbaz"
 ENV read_timeout="6000"
 ENV write_timeout="6000"
 
@@ -37,6 +37,6 @@ ENV write_debug="false"
 
 EXPOSE 8080
 
-HEALTHCHECK --interval=3s CMD [ -e /tmp/.lock ] || exit 1
+HEALTHCHECK --interval=300s CMD [ -e /tmp/.lock ] || exit 1
 
 CMD ["fwatchdog"]
