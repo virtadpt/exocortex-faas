@@ -12,11 +12,7 @@ import mgrs
 import re
 import sys
 
-# These get swapped depending on if I'm debugging or running under OpenFaaS.
-# Local.
-from .openlocationcode import *
-# OpenFaas.
-#from openlocationcode import *
+from openlocationcode import openlocationcode
 
 help = """
 This is a microservice which turns one set of map coordinates into another.
@@ -148,7 +144,7 @@ def dd_to_pluscode(coordinates):
     longitude = float(longitude)
 
     # Do the thing.
-    pluscode = encode(latitude, longitude)
+    pluscode = openlocationcode.encode(latitude, longitude)
 
     return(pluscode)
 
@@ -159,7 +155,7 @@ def pluscode_to_dd(pluscode):
     latitude = 0.0
     longitude = 00
 
-    codearea = decode(pluscode)
+    codearea = openlocationcode.decode(pluscode)
     latitude = codearea.latitudeCenter
     longitude = codearea.longitudeCenter
 
@@ -246,10 +242,6 @@ def handle(req):
             gridref = dd_to_mgrs(latitude, longitude)
             return(gridref)
 
-
-
-
-
     # Case: dd to something
     if (coordinates["from"] == "dd"):
 
@@ -281,9 +273,6 @@ def handle(req):
             (latitude, longitude) = coordinates["coordinates"].split()
             gridref = dd_to_mgrs(latitude, longitude)
             return(gridref)
-
-
-
 
     # Case: openlocationcode/pluscode to something.
     if (coordinates["from"] == "openlocationcode") or (coordinates["from"] == "pluscode"):
@@ -325,9 +314,6 @@ def handle(req):
             # Pass dd to the mgrs generator.
             gridref = dd_to_mgrs(latitude, longitude)
             return(gridref)
-
-
-
 
     # Case: mgrs to something.
     if (coordinates["from"] == "mgrs"):
