@@ -115,8 +115,54 @@ Now follow the "You already have a geoplanet.sqlite database:" instructions abov
 `curl http://https://your.openfaas.gateway.here:8080/function/geoplanet-db/places/?Name=washington%20dc`
 
 ## [hmac-a-tron/](hmac-a-tron/)
+This function takes a JSON document and generates an [HMAC](https://en.wikipedia.org/wiki/Hash-based_message_authentication_code) of it, or a [Javascript Web Token](https://jwt.io/).
+
+Supported algorithms:
+
+* md5
+* sha1
+* sha224
+* sha256
+* sha384
+* sha512
+
+The inputs to the HMAC feature should look like this:
+
+```
+{
+    "data": "<data here>",
+    "hash": "<hashing algorithm to use>",
+    "secret": "<authentication secret>"
+}
+```
+
+Supported JWT algorithms:
+
+* HS256
+* HS386
+* HS512
+
+The inputs to the JWT feature should look like this:
+
+```
+{
+    "hash": "jwt",
+    "headers": {
+        "alg": "<JWT algorithm to use>",
+        "typ": "JWT"
+    },
+    "payload": {
+        "key": "value",
+        "another key": "another value",
+        and so forth...
+    },
+    "secret": "<authentication secret>"
+}
+```
 
 ### Building and deploying
+* `faas-cli build -f hmac-a-tron.yml`
+* `faas-cli deploy -f hmac-a-tron.yml --gateway https://your.openfaas.gateway.here:8080/`
 
 ## [httpbin/](httpbin/)
 
