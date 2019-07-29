@@ -14,10 +14,14 @@ A magick 8-ball of quotes from the [Modern Rogue](https://www.themodernrogue.com
 A simple calculator.  Send it a math problem in a request and it'll solve it.  Operators and operands have to have spaces in between them, like this:
 
 `23 * 5`
+
 `16 + 18 / 2`
 
 Functions supported:
-* + - * /
+* add (+)
+* subtract (-)
+* multiply (*)
+* divide (/)
 * fmod - modulus (floating point output)
 * abs - absolute value
 * ceil - ceiling
@@ -31,13 +35,13 @@ Functions supported:
 This function takes map coordinates in one of the following formats and converts them into map coordinates in any of the other formats it supports:
 
 * degrees/minutes/seconds (dms)
-** 48°53'10.18"N 2°20'35.09"E
+  * 48°53'10.18"N 2°20'35.09"E
 * decimal degrees (dd)
-** -48.8866111111 -2.34330555556
+  * -48.8866111111 -2.34330555556
 * [open location code](https://plus.codes/) (openlocationcode, pluscode)
-** 8FVC9G8F+6X
+  * 8FVC9G8F+6X
 * [Military Grid Reference System](https://en.wikipedia.org/wiki/Military_Grid_Reference_System) (mgrs)
-** 4QFJ1234567890
+  * 4QFJ1234567890
 
 Inputs should look like this:
 
