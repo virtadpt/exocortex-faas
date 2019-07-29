@@ -165,8 +165,11 @@ The inputs to the JWT feature should look like this:
 * `faas-cli deploy -f hmac-a-tron.yml --gateway https://your.openfaas.gateway.here:8080/`
 
 ## [httpbin/](httpbin/)
+When I was learning how to use OpenFaaS, I wrote a simple function that interacts with https://httpbin.org/.  It's nothing special.
 
 ### Building and deploying
+* `faas-cli build -f httpbin.yml`
+* `faas-cli deploy -f httpbin.yml --gateway https://your.openfaas.gateway.here:8080/`
 
 ## [icanhazip/](icanhazip/)
 
