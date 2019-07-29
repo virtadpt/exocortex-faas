@@ -172,13 +172,36 @@ When I was learning how to use OpenFaaS, I wrote a simple function that interact
 * `faas-cli deploy -f httpbin.yml --gateway https://your.openfaas.gateway.here:8080/`
 
 ## [icanhazip/](icanhazip/)
+Pings https://icanhazip.com/ and returns the IP address you're running this container on.  Nothing special.  Just me learning how to use CLI utilities (in this case, wget) as functions.
 
 ### Building and deploying
+* `faas-cli build -f icanhazip.yml`
+* `faas-cli deploy -f icanhazip.yml --gateway https://your.openfaas.gateway.here:8080/`
 
 ## [testssl/](testssl/)
+Installs the [testssl.sh](https://github.com/drwetter/testssl.sh) utility in a container and calls it as a function.
 
 ### Building and deploying
+* `faas-cli build -f testssl.yml`
+* `faas-cli deploy -f testssl.yml --gateway https://your.openfaas.gateway.here:8080/`
 
 ## [twitter-trends/](twitter-trends/)
+This function uses the [Python Twitter module](https://pypi.org/project/twitter/) to call out to the [Twitter API](https://developer.twitter.com/) and list what's trending in a given geographic location.  Dependent upon the [geoplanet-db/](geoplanet-db/) function because Twitter, for reasons unknown, still uses Yahoo! Where On Earth IDs internally.
+
+Takes as its input a JSON document like this:
+
+```
+{
+    "access_key": "Twitter access key",
+    "access_secret": "Twitter access secret",
+    "consumer_key": "Twitter app consumer key",
+    "consumer_secret": "Twitter app consumer secret",
+    "location_id": "woeid of the location you want information about"
+}
+```
+
+Returns a JSON document containing terms trending on Twitter for that location.
 
 ### Building and deploying
+* `faas-cli build -f testssl.yml`
+* `faas-cli deploy -f testssl.yml --gateway https://your.openfaas.gateway.here:8080/`
