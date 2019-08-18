@@ -4,9 +4,15 @@
 
 # by: The Doctor [412/724/301/703/415/510] <drwho at virtadpt dot net>
 
+# v2.1 - Added geohash (https://en.wikipedia.org/wiki/Geohash) support.
+#      - Refactored to optimize the conversion process.  Pretty much everything is done by
+#        converting decimal coordinates into something else, so I moved that up front and
+#        got rid of all of the other copies of that code.  Helped me shake some bad
+#        assumptions out, too.
 # v2.0 - Refactored so it's significantly neater and easier to maintain.
 # v1.0 - Initial release.
 
+import geohash2
 import json
 import mgrs
 import re
@@ -33,11 +39,13 @@ Supported coordinate types:
 ** 8FVC9G8F+6X
 * Military Grid Reference System (mgrs)
 ** 4QFJ1234567890
+* geohash
+** 5zq3fsmwv50t
 
 If you supply the wrong kind of coordinates for the type given, you will get bad results.
 """
 required_keys = [ "coordinates", "from", "to" ]
-supported_coordinates = [ "dms", "dd", "openlocationcode", "pluscode", "mgrs" ]
+supported_coordinates = [ "dms", "dd", "openlocationcode", "pluscode", "mgrs", "geohash" ]
 
 # Try to deserialize content from the client.  Return the hash table
 # containing the deserialized JSON if it exists.
@@ -181,6 +189,23 @@ def mgrs_to_dd(gridref):
 
     return(coordinates)
 
+# Convert dd to geohash.  Returns a string containing the geohash.
+def dd_to_geohash(latitude, longitude):
+    geohash = None
+
+    geohash = geohash2.encode(float(latitude), float(longitude))
+
+    return geohash
+
+# Convert geohash to dd.  Returns a string containing the geohash.
+def geohash_to_dd(geohash):
+    coordinates = None
+
+    coordinates = geohash2.decode(geohash)
+    coordinates = " ".join(coordinates)
+
+    return coordinates
+
 # Entry point to the function.
 def handle(req):
     coordinates = {}
@@ -188,6 +213,7 @@ def handle(req):
     longitude = None
     pluscode = None
     gridref = None
+    geohash = None
 
     # If no input, return online help.
     if not req:
@@ -211,36 +237,29 @@ def handle(req):
     # Case: dms to something
     if (coordinates["from"] == "dms"):
 
+        # First convert to dd.
+        (latitude, longitude) = coordinates["coordinates"].split()
+        latitude = str(dms_to_dd(latitude))
+        longitude = str(dms_to_dd(longitude))
+
         # Case: output is dd.
         if (coordinates["to"] == "dd"):
-            (latitude, longitude) = coordinates["coordinates"].split()
-            latitude = str(dms_to_dd(latitude))
-            longitude = str(dms_to_dd(longitude))
             return(latitude + " " + longitude)
 
         # Case: output is openlocationcode/pluscode.
         if (coordinates["to"] == "openlocationcode") or (coordinates["to"] == "pluscode"):
-
-            # First convert to dd.
-            (latitude, longitude) = coordinates["coordinates"].split()
-            latitude = str(dms_to_dd(latitude))
-            longitude = str(dms_to_dd(longitude))
-
-            # Pass dd to the pluscode generator.
             pluscode = dd_to_pluscode(latitude + " " + longitude)
             return(pluscode)
 
         # Case: output is mgrs.
         if (coordinates["to"] == "mgrs"):
-
-            # First convert to dd.
-            (latitude, longitude) = coordinates["coordinates"].split()
-            latitude = str(dms_to_dd(latitude))
-            longitude = str(dms_to_dd(longitude))
-
-            # Pass dd to the mgrs generator.
             gridref = dd_to_mgrs(latitude, longitude)
             return(gridref)
+
+        # Case: output is geohash.
+        if (coordinates["to"] == "geohash"):
+            geohash = dd_to_geohash(latitude, longitude)
+            return(geohash)
 
     # Case: dd to something
     if (coordinates["from"] == "dd"):
@@ -274,23 +293,24 @@ def handle(req):
             gridref = dd_to_mgrs(latitude, longitude)
             return(gridref)
 
+        # Case: output is geohash.
+        if (coordinates["to"] == "geohash"):
+            (latitude, longitude) = coordinates["coordinates"].split()
+            geohash = dd_to_geohash(latitude, longitude)
+            return(geohash)
+
     # Case: openlocationcode/pluscode to something.
     if (coordinates["from"] == "openlocationcode") or (coordinates["from"] == "pluscode"):
 
+        # First convert to dd.
+        (latitude, longitude) = pluscode_to_dd(coordinates["coordinates"]).split()
+
         # Case: output is dd.
         if coordinates["to"] == "dd":
-            coordinates = pluscode_to_dd(coordinates["coordinates"])
-            (latitude, longitude) = coordinates.split()
             return(latitude + " " + longitude)
 
         # Case: output is dms.
         if coordinates["to"] == "dms":
-
-            # First convert to dd.
-            coordinates = pluscode_to_dd(coordinates["coordinates"])
-            (latitude, longitude) = coordinates.split()
-
-            # Now convert dd to dms.
             latitude = dd_to_dms(latitude)
             if "+" in latitude:
                 latitude = re.sub("\+", "N", latitude)
@@ -306,31 +326,26 @@ def handle(req):
 
         # Case: output is mgrs.
         if coordinates["to"] == "mgrs":
-
-            # First convert to dd.
-            coordinates = pluscode_to_dd(coordinates["coordinates"])
-            (latitude, longitude) = coordinates.split()
-
-            # Pass dd to the mgrs generator.
             gridref = dd_to_mgrs(latitude, longitude)
             return(gridref)
+
+        # Case: output is geohash.
+        if coordinates["to"] == "geohash":
+            geohash = dd_to_geohash(latitude, longitude)
+            return(geohash)
 
     # Case: mgrs to something.
     if (coordinates["from"] == "mgrs"):
 
+        # First convert to dd.
+        (latitude, longitude) = mgrs_to_dd(coordinates["coordinates"]).split()
+
         # Case: output is dd.
         if coordinates["to"] == "dd":
-            coordinates = mgrs_to_dd(coordinates["coordinates"])
-            return(coordinates)
+            return(latitude + " " + longitude)
 
         # Case: output is dms.
         if coordinates["to"] == "dms":
-
-            # First convert to dd.
-            coordinates = mgrs_to_dd(coordinates["coordinates"])
-            (latitude, longitude) = coordinates.split()
-
-            # Now convert dd to dms.
             latitude = dd_to_dms(latitude)
             if "+" in latitude:
                 latitude = re.sub("\+", "N", latitude)
@@ -347,13 +362,49 @@ def handle(req):
 
         # Case: output is openlocationcode/pluscode.
         if (coordinates["to"] == "openlocationcode") or (coordinates["to"] == "pluscode"):
-
-            # First convert to dd.
-            coordinates = mgrs_to_dd(coordinates["coordinates"])
-
-            # Pass dd to the pluscode generator.
-            pluscode = dd_to_pluscode(coordinates)
+            pluscode = dd_to_pluscode(latitude + " " + longitude)
             return(pluscode)
+
+        # Case: output is geohash.
+        if coordinates["to"] == "geohash":
+            geohash = dd_to_geohash(latitude, longitude)
+            return(geohash)
+
+    # Case: geohash to something.
+    if (coordinates["from"] == "geohash"):
+
+        # First convert to dd.
+        (latitude, longitude) = geohash_to_dd(coordinates["coordinates"]).split()
+
+        # Case: output is dd.
+        if coordinates["to"] == "dd":
+            return(latitude + " " + longitude)
+
+        # Case: output is dms.
+        if coordinates["to"] == "dms":
+            latitude = dd_to_dms(latitude)
+            if "+" in latitude:
+                latitude = re.sub("\+", "N", latitude)
+            else:
+                latitude = re.sub("\-", "S", latitude)
+
+            longitude = dd_to_dms(longitude)
+            if "+" in longitude:
+                longitude = re.sub("\+", "E", longitude)
+            else:
+                longitude = re.sub("\-", "W", longitude)
+
+            return(latitude + " " + longitude)
+
+        # Case: output is openlocationcode/pluscode.
+        if (coordinates["to"] == "openlocationcode") or (coordinates["to"] == "pluscode"):
+            pluscode = dd_to_pluscode(latitude + " " + longitude)
+            return(pluscode)
+
+        # Case: output is mgrs.
+        if coordinates["to"] == "mgrs":
+            gridref = dd_to_mgrs(latitude, longitude)
+            return(gridref)
 
     return(help)
 
@@ -493,6 +544,62 @@ if __name__ == "__main__":
     test["coordinates"] = "15TWG0000049776"
     test["from"] = "mgrs"
     test["to"] = "openlocationcode"
+    print(handle(json.dumps(test)))
+
+    # Test converting dms to geohash.
+    print("Converting DMS to geohash...", end=" ")
+    test["coordinates"] = "48°53'10.18\"N 2°20'35.09\"E"
+    test["from"] = "dms"
+    test["to"] = "geohash"
+    print(handle(json.dumps(test)))
+
+    # Test converting dd to geohash.
+    print("Converting DD to geohash...", end=" ")
+    test["coordinates"] = "-48.8866111111 -2.34330555556"
+    test["from"] = "dd"
+    test["to"] = "geohash"
+    print(handle(json.dumps(test)))
+
+    # Test converting openlocationcode to geohash.
+    print("Converting pluscode to geohash...", end=" ")
+    test["coordinates"] = "8FVC9G8F+6X"
+    test["from"] = "pluscode"
+    test["to"] = "geohash"
+    print(handle(json.dumps(test)))
+
+    # Test converting mgrs to geohash.
+    print("Converting MGRS to geohash...", end=" ")
+    test["coordinates"] = "15TWG0000049776"
+    test["from"] = "mgrs"
+    test["to"] = "geohash"
+    print(handle(json.dumps(test)))
+
+    # Test converting geohash to dms.
+    print("Converting geohash to dms...", end=" ")
+    test["coordinates"] = "ezs42e44yx96"
+    test["from"] = "geohash"
+    test["to"] = "dms"
+    print(handle(json.dumps(test)))
+
+    # Test converting geohash to dd.
+    print("Converting geohash to dd...", end=" ")
+    test["coordinates"] = "ezs42e44yx96"
+    test["from"] = "geohash"
+    test["to"] = "dd"
+    print(handle(json.dumps(test)))
+
+    # Test converting geohash to openlocationcode/pluscode.
+    print("Converting geohash to pluscode...", end=" ")
+    test["coordinates"] = "ezs42e44yx96"
+    test["from"] = "geohash"
+    test["to"] = "openlocationcode"
+    print(handle(json.dumps(test)))
+
+    # Test converting geohash to mgrs.
+    print("Converting geohash to mgrs...", end=" ")
+    test["coordinates"] = "ezs42e44yx96"
+    test["from"] = "geohash"
+    test["to"] = "mgrs"
     print(handle(json.dumps(test)))
 
     print("End of unit tests.")
