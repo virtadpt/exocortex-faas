@@ -171,6 +171,13 @@ When I was learning how to use OpenFaaS, I wrote a simple function that interact
 * `faas-cli build -f httpbin.yml`
 * `faas-cli deploy -f httpbin.yml --gateway https://your.openfaas.gateway.here:8080/`
 
+## [i-ching/](i-ching/)
+A quick and dirty function that casts an [i ching](https://en.wikipedia.org/wiki/I_Ching) hexagram.  Each time you hit this function it'll toss the yarrow stalks again and return the hexagram as ASCII art, the name and number, and [a link to Wikipedia](https://en.wikipedia.org/wiki/List_of_hexagrams_of_the_I_Ching) which describes the hexagram.  Because everyone has their own take on things I leave it to you to determine what it may mean; there is no shortage of [i ching references](https://duckduckgo.com/?q=i+ching) out there, so pick the one you like.
+
+### Building and deploying
+* `faas-cli build -f i-ching.yml`
+* `faas-cli deploy -f i-ching.yml --gateway https://your.openfaas.gateway.here:8080/`
+
 ## [icanhazip/](icanhazip/)
 Pings https://icanhazip.com/ and returns the IP address you're running this container on.  Nothing special.  Just me learning how to use CLI utilities (in this case, wget) as functions.
 
