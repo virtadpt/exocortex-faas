@@ -12,7 +12,7 @@ are separated by spaces, and I'll send back the answer.  For example:
 
 I support the following operations:
 
-    + - * / 
+    + - * /
     fmod - modulus (floating point output)
     abs - absolute value
     ceil - ceiling
@@ -20,10 +20,21 @@ I support the following operations:
 
 """
 
-def handle(req):
-    if not req:
-        return help
+def handle(event, context):
+
+    # Assume that no payload in the request means the user is asking for
+    # help.
+    if not event.body:
+        response = {}
+        response["statusCode"] = 400
+        response["body"] = help
+        return(response)
 
     calc = SimpleCalculator()
-    calc.run(req)
-    return calc.lcd
+    calc.run(event.body)
+
+    response = {}
+    response["statusCode"] = 200
+    response["body"] = str(calc.lcd)
+    return(response)
+
