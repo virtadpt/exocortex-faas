@@ -1,9 +1,0 @@
-version: 1.0
-provider:
-  name: openfaas
-  gateway: http://127.0.0.1:8080
-functions:
-  8ball-tmr:
-    lang: python3
-    handler: ./8ball-tmr
-    image: 8ball-tmr:latest

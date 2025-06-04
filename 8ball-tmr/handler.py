@@ -1,7 +1,7 @@
-#!/usr/bin/env python3
+# This is a simple little magic 8 ball function, inspired by The Modern Rogue
+# Discord server.
 
 import random
-import sys
 
 responses = [
     "Sounds like an injury counter reset to me.",
@@ -16,13 +16,14 @@ responses = [
     "Imagine these in the hands of someone who knows what they're doing!",
     "That looks safe.",
     "All those years of _Duck Hunt_ finally paid off!",
-    "yarrrr, there be explosions in here...."
+    "Yarrrr, there be explosions in here...."
     ]
 
-def handle(req):
+def handle(event, context):
     response = random.choice(responses)
-    return response
 
-if __name__ == "__main__":
-    print(handle(None))
-    sys.exit(0)
+    response_body = {}
+    response_body["statusCode"] = 200
+    response_body["body"] = response
+
+    return(response_body)
